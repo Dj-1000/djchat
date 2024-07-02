@@ -33,7 +33,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
     # Receive message from room group
     async def chat_message(self, event):
         group_message = event["message"]
-        print("In chat_message function :",group_message)
+        print("Recieved from group:",group_message)
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             "message": group_message
