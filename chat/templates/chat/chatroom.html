@@ -1,11 +1,12 @@
-{% extends 'base.html' %}
+{% extends 'chat/base.html' %}
 
 {% block title %}Chat Room | RT Chat{% endblock %}
 
 {% block content %}
 
 <div id="user-hello" class="text-dark">
-  Chat Room page
+  <p>Welcome {{user}}</p>
+  <p>{{room_id}}</p>
 </div>
 <div class="container ">
   <div class="row d-flex justify-content-center">
@@ -21,9 +22,9 @@
     </div>
   </div>
 </div>
-{{room_name | json_script:"room-name"}}
+{{room_id | json_script:"room-id"}}
 <script>
-  const roomName = JSON.parse(document.getElementById('room-name').textContent);
+  const roomName = JSON.parse(document.getElementById('room-id').textContent);
   const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
 
   chatSocket.onclose = function (e) {
