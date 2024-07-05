@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "channels",
     'crispy_forms',
     'crispy_bootstrap4',
+    'django_celery_beat',
 
     #Local apps
     "chat",
@@ -148,3 +149,23 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1)
 }
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# Celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+CELERY_BEAT_SCHEDULE = {
+    'add-two-num': {
+        'task': 'accounts.tasks.add',  
+        'schedule': timedelta(seconds=10), 
+        'args': (15,15)
+    },
+}
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Replace with your email host
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'tu716599@gmail.com'
+EMAIL_HOST_PASSWORD = 'inpphupkdjfjstlc'

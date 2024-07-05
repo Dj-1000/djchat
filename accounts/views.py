@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.contrib import messages
 
 from rest_framework.decorators import api_view
-import requests
+from .tasks import send_mail_task
 
 User = get_user_model()
 
@@ -46,6 +46,8 @@ def login(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 # request.session['user_id'] = user.id  # Store the user id in session
+                msg = f"Hello {user.username}. Welcoome to the Realtime Chat Application."
+                send_mail_task.delay(user.email, msg)  
                 auth.login(request, user)
                 return redirect('dashboard')
             else:
