@@ -6,15 +6,22 @@
 
 <div id="user-hello" class="text-dark">
   <p>Welcome {{user}}</p>
-  <p>{{room_id}}</p>
 </div>
+<hr>
+
 <div class="container ">
   <div class="row d-flex justify-content-center">
     <div class="col-6">
       <form>
         <div class="form-group">
           <h4>Chat Room</h4>
-          <textarea class="form-control" id="chat-log" readonly rows="5"></textarea><br>
+          <textarea class="form-control" id="chat-log" readonly rows="5">
+            {% if prev_messages %}
+            {% for message in prev_messages %}
+            {{ message.sent_by }} - {{ message.content }}
+            {% endfor %}
+            {% endif %}
+          </textarea><br>
           <input class="form-control" id="chat-message-input" type="text"><br>
           <button style="width: 20%;display: block;margin:0 auto;" class="btn btn-primary" type="submit" id="chat-message-submit">Send</button>
         </div>
@@ -22,9 +29,12 @@
     </div>
   </div>
 </div>
+<textarea name="signalBody" id="signalBody"></textarea>
+
 {{room_id | json_script:"room-id"}}
 <script>
   const roomName = JSON.parse(document.getElementById('room-id').textContent);
+
   const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
 
   chatSocket.onclose = function (e) {
@@ -34,7 +44,11 @@
   chatSocket.onmessage = function (e) {
     const data = JSON.parse(e.data);
     console.log("Received message:", data);
-    document.querySelector('#chat-log').value += (data.message + '\n');
+
+    const chatLog = document.querySelector('#chat-log');
+    chatLog.value += (data.message + '\n');    
+    // scroll 'chatLog' to the bottom
+    chatLog.scrollTop = chatLog.scrollHeight;
   };
 
   document.querySelector('#chat-message-input').focus();
@@ -58,6 +72,8 @@
         messageInputDom.value = '';
     };
   };
+
+
 </script>
 
 {% endblock %}

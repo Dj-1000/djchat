@@ -50,27 +50,7 @@ def login(request):
                 return redirect('dashboard')
             else:
                 messages.error(request, 'Invalid username or password')
-
-            #  The jwt token endpoint
-            # url = 'http://localhost:8000/accounts/token/'
-            
-            # response = requests.post(url, data=payload)
-
-            # if response.status_code == 200:
-            #     data = response.json()
-            #     access = data['access']
-            #     refresh = data['refresh']
-            #     request.session['access'] = access
-            #     request.session['refresh'] = refresh
-            #     if access is not None:
-            #         print(f'Access token: {access}')
-            #         return redirect('dashboard')
-            #     else:
-            #         print('Login failed:', data)
-            # else:
-            #     print('Failed to call the API:', response.status_code)
                         
-
     return render(request, "login.html", context={"form": form})
 
 
