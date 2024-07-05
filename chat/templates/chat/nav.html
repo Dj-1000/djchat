@@ -6,7 +6,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarColor02">
         <ul class="navbar-nav me-auto">
-
           {% if user.is_authenticated %}
             <li class="nav-item">
                 <a class="nav-link active" href="{% url 'dashboard' %}">Dashboard
@@ -31,7 +30,6 @@
             </li>
 
           {% endif %}
-          
         </ul>
       </div>
     </div>
