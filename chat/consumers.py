@@ -3,6 +3,7 @@ import json
 from channels.db import database_sync_to_async
 from .models import Room,Messages
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 class ChatRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -48,9 +49,11 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "chat_message",
-                "message": message
+                "message": message,
+                "current_user":await self.get_current_user(self.user),
+                "sent_by": await self.get_sent_by(message)
             })
-    
+
 
     # Receive message from room group
     async def chat_message(self, event):
@@ -59,7 +62,9 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
         print("Recieved from group:",msg)
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            "message": msg
+            "message": msg,
+            "sent_by": await self.get_sent_by(msg),
+            "current_user":await self.get_current_user(self.user)
         }))
 
 
@@ -68,3 +73,12 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
     def get_other_user(self,room):
         return list(room.member.all().exclude(id = self.user.id))[0]
         
+    @database_sync_to_async
+    def get_sent_by(self,message):
+        msg = Messages.objects.filter(content=message).first()
+        return msg.sent_by.first_name
+    
+    @database_sync_to_async
+    def get_current_user(self,user):
+        msg = User.objects.filter(id = user.id).first()
+        return msg.first_name

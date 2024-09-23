@@ -1,5 +1,5 @@
 {% extends 'chat/base.html' %}
-{% block title %}RT Chat {% endblock %}
+{% block title %}RT Chat{% endblock %}
 {% block content %}
 <!-- <div class="col-sm-5">
     <label for="room-name-input"class="form-label mt-4"><h3>What chat room would you like to enter?</h3><br></label>
@@ -23,7 +23,18 @@
 
 </script> -->
 
-<h3>This is Realtime Chat Application</h3>
+<div class="container">
+    <div style="height: 50px;"></div>
+    <div style="font-family: cursive;
+    font-variant-position: sub;
+    padding-left: 100px;
+    width: 70%;">
+    <h3 style="font-weight: 300;">Welcome to Realtime Chat App developed by Dheeraj Sharma. This is a mini project implementing one to one chat between two user.</h3> 
+    
+    <h3 style="font-weight: 300;">Here you can converse with your frined by clicking on the chat icon on the right of their email on <a style="color: inherit ;text-decoration:none;" href="{% url 'dashboard' %}">Dashboard</a>.</h3>
+    </div>
+
+</div>
 
 
 {% endblock %}

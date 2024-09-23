@@ -8,7 +8,7 @@ from django.shortcuts import render,redirect
 from .forms import CreateUserForm,LoginForm
 from django.urls import reverse
 from django.contrib import messages
-
+from chat.models import Room
 from rest_framework.decorators import api_view
 from .tasks import send_mail_task
 
@@ -20,8 +20,9 @@ def register(request):
     if request.method=='POST':
         form = CreateUserForm(request.POST)
         if form.is_valid():
-            form.save()
-            
+            user = form.save()
+            msg = f"Hello {user.username}. Welcome to the Realtime Chat Application."
+            send_mail_task.delay(user, msg)  
             return redirect(reverse('login'))
         else:
             messages.error(request, 'There was an error with your registration. Please try again.')
@@ -46,8 +47,6 @@ def login(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 # request.session['user_id'] = user.id  # Store the user id in session
-                msg = f"Hello {user.username}. Welcoome to the Realtime Chat Application."
-                send_mail_task.delay(user.email, msg)  
                 auth.login(request, user)
                 return redirect('dashboard')
             else:

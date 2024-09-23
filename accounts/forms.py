@@ -7,7 +7,7 @@ from django.forms.widgets import PasswordInput, TextInput
 class CreateUserForm(UserCreationForm):
     class Meta:
         model = get_user_model()
-        fields = ['username','email','password1','password2']
+        fields = ['username','first_name','last_name','email','password1','password2']
         
         
 # authenticate the user

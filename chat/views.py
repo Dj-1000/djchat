@@ -25,18 +25,31 @@ def room(request,other_user_id):
         if rooms_with_user:
             return redirect(reverse('chat_view',kwargs={"room_id" : rooms_with_user.id}))
             
-         
         else:
             room = Room()
             room.save()
             room.member.add(user,other_user)
             return redirect(reverse('chat_view',kwargs={"room_id" : room.id}))
 
+@login_required
+def join_room(request):
+    if request.method == 'POST':
+        user = request.user
+        room_id = request.POST.get('room_id')
+        room = Room.objects.filter(id = room_id).first()
+        if room:
+            room.join(user)
+            return redirect(reverse('chat_view', kwargs={'room_id': room_id}))
+
+    return render(request, "join_room.html")
+
+@login_required
 def chat_view(request,room_id):
-    prev_messages = Messages.objects.filter(room__id = room_id).order_by('-created_at')
+    prev_messages = Messages.objects.filter(room__id = room_id).order_by('created_at')
     context = {
         'room_id': room_id,
-        'prev_messages' : prev_messages
+        'prev_messages' : prev_messages,
+        'current_user': request.user
     }
     return render(request,'chat/chatroom.html',context=context)
     

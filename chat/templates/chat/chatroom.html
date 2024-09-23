@@ -1,77 +1,212 @@
 {% extends 'chat/base.html' %}
 
-{% block title %}Chat Room | RT Chat{% endblock %}
+{% block title %}Chat Room | RTC{% endblock %}
 
 {% block content %}
 
-<div id="user-hello" class="text-dark">
+<div id="user-hello" class="container text-dark">
   <p>Welcome {{user}}</p>
 </div>
 <hr>
 
-<div class="container ">
+<div class="container mt-5">
   <div class="row d-flex justify-content-center">
-    <div class="col-6">
-      <form>
-        <div class="form-group">
-          <h4>Chat Room</h4>
-          <textarea class="form-control" id="chat-log" readonly rows="5">
+    <div class="col-12 col-lg-8" style="text-align: end;">
+      <div class="card shadow-sm mt-2">
+        <div class="card-header bg-primary text-white pt-3 pb-4 text-center">
+          <h4 class="mb-0">Real Time Chat</h4>
+        </div>
+        <div id="chat-log" class="card-body mt-3 border p-3 mb-3 ms-2 me-2" style="
+        height: 300px;
+        overflow-y: scroll;
+        background-color: #f8f8f8;
+        height: 400px;
+        border-radius: 10px;
+        clear: both;
+      ">
+          {% if prev_messages %}
+          {% for message in prev_messages %}
+          {% if message.sent_by != current_user %}
+          <div class="msg-container ">
+            <div class="user-icon">
+              <i class="fa-solid fa-user fa-lg"></i>
+            </div>
+            <div class="message">
+              <div class="first_name">{{ message.sent_by.first_name }}</div>
+              <div class="other_user_msg">
+                {{ message.content }}
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="msg-container justify-content-end">
+            <div class="message user-msg">
+              <div class="first_name">{{ message.sent_by.first_name }}</div>
+              <div class="message_content">
+                {{ message.content }}
+              </div>
+            </div>
+            <div class="user-icon">
+              <i class="fa-solid fa-user fa-lg"></i>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+        </div>
+        <div class="input-group chat-input">
+          <input class="form-control" id="chat-message-input" type="text" placeholder="Type your message here..."
+            aria-label="Type your message here" />
+          <button class="btn btn-primary" type="button" id="chat-message-submit">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- <div class="col-6">
+    <form>
+      <div class="form-group">
+        <h4>Chat Room</h4>
+        <textarea class="form-control" id="chat-log" readonly rows="5">
             {% if prev_messages %}
             {% for message in prev_messages %}
             {{ message.sent_by }} - {{ message.content }}
             {% endfor %}
             {% endif %}
           </textarea><br>
-          <input class="form-control" id="chat-message-input" type="text"><br>
-          <button style="width: 20%;display: block;margin:0 auto;" class="btn btn-primary" type="submit" id="chat-message-submit">Send</button>
-        </div>
-      </form>
-    </div>
+        <input class="form-control" id="chat-message-input" type="text"><br>
+        <button style="width: 20%;display: block;margin:0 auto;" class="btn btn-primary" type="submit"
+          id="chat-message-submit">Send</button>
+      </div>
+    </form>
   </div>
 </div>
+</div>
+</div> -->
 {{room_id | json_script:"room-id"}}
-<script>
-  const roomName = JSON.parse(document.getElementById('room-id').textContent);
 
-  const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+<script>
+  const roomName = JSON.parse(
+    document.getElementById("room-id").textContent
+  );
+  if (window.location.protocol === "https:") {
+    console.log(`wss://${window.location.host}/ws/chat/${roomName}/`)
+    var chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`);
+  }
+  else  {
+    console.log(`ws://${window.location.host}/ws/chat/${roomName}/`)
+    var chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+  }
 
   chatSocket.onclose = function (e) {
-    console.error('Chat socket closed unexpectedly');
+    console.error("Chat socket closed unexpectedly");
   };
 
   chatSocket.onmessage = function (e) {
     const data = JSON.parse(e.data);
-    console.log("Received message:", data);
+    console.log(data);
+    const chatLog = document.querySelector("#chat-log");
 
-    const chatLog = document.querySelector('#chat-log');
-    chatLog.value += (data.message + '\n');    
-    // scroll 'chatLog' to the bottom
+    if (data.sent_by === data.current_user) {
+      console.log("Received user message from user:", data);
+
+      const userContainer = document.createElement("div");
+      const userMsgDiv = document.createElement("div");
+      const firstName = document.createElement("div");
+      const messageDiv = document.createElement("div");
+
+      const userIconDiv = document.createElement("div");
+      const iconElement = document.createElement("i");
+
+
+      userContainer.className = "msg-container justify-content-end";
+      userMsgDiv.className = "message user-msg";
+      firstName.className = "first_name";
+      messageDiv.className = "message_content";
+      userIconDiv.className = "user-icon";
+      iconElement.className = "fa-solid fa-user fa-lg";
+
+
+      firstName.textContent = data.sent_by;
+      console.log("Sent by: " + data.sent_by);
+      messageDiv.textContent = data.message;
+
+      userMsgDiv.appendChild(firstName);
+      userMsgDiv.appendChild(messageDiv);
+      userIconDiv.appendChild(iconElement);
+
+      // Append the user-messages div
+      userContainer.appendChild(userMsgDiv);
+      userContainer.appendChild(userIconDiv);
+
+      chatLog.appendChild(userContainer);
+    } else {
+      console.log("Other user response:", data);
+
+      const otherUserContainer = document.createElement("div");
+      const otherUserIconDiv = document.createElement("div");
+      const otherUserMsgDiv = document.createElement("div");
+
+      const othersName = document.createElement("div");
+      const otherMsgContent = document.createElement("div");
+      const otherIconElement = document.createElement("i");
+
+      otherUserContainer.className = "msg-container";
+      otherUserMsgDiv.className = "message";
+      othersName.className = "first_name";
+      otherMsgContent.className = "other_user_msg";
+      otherUserIconDiv.className = "user-icon";
+      otherIconElement.className = "fa-solid fa-user fa-lg";
+
+      othersName.textContent = data.sent_by;
+      console.log("Sent by: " + data.sent_by);
+      otherMsgContent.textContent = data.message;
+
+      otherUserIconDiv.appendChild(otherIconElement);
+      otherUserMsgDiv.appendChild(othersName);
+      otherUserMsgDiv.append(otherMsgContent)
+
+      // Append the bot-icon and bot-msg divs to the bot-container div
+      otherUserContainer.appendChild(otherUserIconDiv);
+      otherUserContainer.appendChild(otherUserMsgDiv);
+
+      // Append the bot-container div to the chat log
+      chatLog.appendChild(otherUserContainer);
+    }
+
+    // Scroll 'chatLog' to the bottom
     chatLog.scrollTop = chatLog.scrollHeight;
   };
 
-  document.querySelector('#chat-message-input').focus();
-  document.querySelector('#chat-message-input').onkeyup = function (e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        document.querySelector('#chat-message-submit').click();
+  document.querySelector("#chat-message-input").focus();
+  document.querySelector("#chat-message-input").onkeyup = function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      document.querySelector("#chat-message-submit").click();
     }
   };
 
   chatSocket.onopen = function (e) {
     console.log("WebSocket connection opened!");
-    document.querySelector('#chat-message-submit').onclick = function (e) {
-        e.preventDefault();
-        const messageInputDom = document.querySelector('#chat-message-input');
-        const message = messageInputDom.value;
-        console.log("Sending message:", message);
-        chatSocket.send(JSON.stringify({
-             'message': message 
-        }));
-        messageInputDom.value = '';
+    document.querySelector("#chat-message-submit").onclick = function (e) {
+      e.preventDefault();
+      const messageInputDom = document.querySelector("#chat-message-input");
+      const message = messageInputDom.value;
+      console.log("Sending message :", message);
+      chatSocket.send(
+        JSON.stringify({
+          message: message,
+        })
+      );
+      messageInputDom.value = "";
     };
   };
-
-
 </script>
 
 {% endblock %}
